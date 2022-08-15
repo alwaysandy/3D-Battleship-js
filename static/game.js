@@ -1,13 +1,15 @@
 function createBoardDivs() {
     const container = document.querySelector('.flex-container');
-    const boardRows = [];
     let boardRow, boardNode;
     for (let i = 0; i < 2; i++) {
         for (let z = 0; z < BOARD_SIZE; z++) {
             if (i === 0) {
                 boardRow = document.createElement('div');
+                if (z !== 0) {
+                    boardRow.classList.add('hidden');
+                }
                 boardRow.classList.add('board-row');
-                boardRows.push(boardRow);
+                boardRowNodes.push(boardRow);
                 playerBoardNodes.push([]);
             } else {
                 opBoardNodes.push([]);
@@ -52,18 +54,17 @@ function createBoardDivs() {
                 }
                 boardNode.appendChild(line);
             }
-            const zP = document.createElement('p');
-            zP.classList.add('zInfo');
-            zP.textContent = "z: " + z;
-            boardNode.appendChild(zP);
-            if (i === 1) {
-                zP.classList.add('opZInfo');
+            if (i === 0) {
+                const zP = document.createElement('p');
+                zP.classList.add('zInfo');
+                zP.textContent = "z: " + z;
+                boardNode.appendChild(zP);
             }
-            boardRows[z].appendChild(boardNode);
+            boardRowNodes[z].appendChild(boardNode);
         }
     }
 
-    boardRows.forEach(br => container.appendChild(br));
+    boardRowNodes.forEach(br => container.appendChild(br));
 }
 
 function createShotsDataArray() {
@@ -147,11 +148,74 @@ function handleClick(t) {
     }
 }
 
+function displayNextSlice() {
+    if (slice === 4) {
+        return;
+    }
+
+    boardRowNodes[slice].classList.add('hidden');
+    slice++;
+    boardRowNodes[slice].classList.remove('hidden');
+}
+
+function displayPrevSlice() {
+    if (slice === 0) {
+        return;
+    }
+    boardRowNodes[slice].classList.add('hidden');
+    slice--;
+    boardRowNodes[slice].classList.remove('hidden');
+}
+
+function displayExplodedView() {
+    const sliceViewButton = document.querySelector('#slice-view');
+    const explodedViewButton = document.querySelector('#exploded-view');
+    const nextSliceButton = document.querySelector('#next-slice');
+    const prevSliceButton = document.querySelector('#prev-slice');
+    
+    for (let n of boardRowNodes) {
+        n.classList.remove('hidden');
+    }
+    sliceViewButton.classList.remove('hidden');
+    explodedViewButton.classList.add('hidden');
+    nextSliceButton.classList.add('hidden');
+    prevSliceButton.classList.add('hidden');
+}
+
+function displaySliceView() {
+    const explodedViewButton = document.querySelector('#exploded-view');
+    const sliceViewButton = document.querySelector('#slice-view');
+    const nextSliceButton = document.querySelector('#next-slice');
+    const prevSliceButton = document.querySelector('#prev-slice');
+    
+    for (let i = 0; i < boardRowNodes.length; i++) {
+        if (i !== slice) {
+            boardRowNodes[i].classList.add('hidden');
+        }
+    }
+    explodedViewButton.classList.remove('hidden');
+    sliceViewButton.classList.add('hidden');
+    nextSliceButton.classList.remove('hidden')
+    prevSliceButton.classList.remove('hidden')
+}
+
 function addEventListeners() {
     const opTiles = document.querySelectorAll('.op-tile');
     opTiles.forEach(tile => tile.addEventListener('click', handleClick));
     const restartGame = document.querySelector('#restart-game-button');
     restartGame.addEventListener('click', () => socket.emit("restart_game")); 
+
+    const nextSlice = document.querySelector('#next-slice');
+    nextSlice.addEventListener('click', displayNextSlice);
+
+    const prevSlice = document.querySelector('#prev-slice');
+    prevSlice.addEventListener('click', displayPrevSlice);
+
+    const explodedViewButton = document.querySelector('#exploded-view');
+    explodedViewButton.addEventListener('click', displayExplodedView);
+
+    const sliceViewButton = document.querySelector('#slice-view');
+    sliceViewButton.addEventListener('click', displaySliceView);
 }
 
 function clearEventListeners() {
@@ -165,10 +229,12 @@ function clearEventListeners() {
 const BOARD_SIZE = 5;
 const playerBoardNodes = [];
 const opBoardNodes = [];
+const boardRowNodes = [];
 createBoardDivs();
 const shots = createShotsDataArray();
 let ships = [];
 let turn;
+let slice = 0;
 const messageNode = document.querySelector('.message');
 
 let socket = io();
