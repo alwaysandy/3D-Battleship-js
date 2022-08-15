@@ -172,39 +172,58 @@ function moveShip(x, y, z) {
     selectShip(x, y, z);
 }
 
-function rotateShip() {
+function rotateShip(next) {
     let s = ships[selected];
-    let dir = s.dir === 0 ? 1 : 0;
-    if (dir === 0) {
-        if (checkCollision(s.x + 1, s.y, dir, s.size - 1)) {
+    let nextDir = s.dir;
+    nextDir += next;
+    if (nextDir === -1) {
+        nextDir = 2; 
+    } else if (nextDir === 3) {
+        nextDir = 0;
+    }
+
+    if (nextDir === 0) {
+        if (checkCollision(s.x + 1, s.y, s.z, nextDir, s.size - 1)) {
             console.log("can't rotate");
             return;
         }
-    } else {
-        if (checkCollision(s.x, s.y + 1, dir, s.size - 1)) {
+    } else if (nextDir === 1) {
+        if (checkCollision(s.x, s.y + 1, s.z, nextDir, s.size - 1)) {
             console.log("can't rotate");
+            return;
+        }
+    } else if (nextDir === 2) {
+        if (checkCollision(s.x, s.y, s.z + 1, nextDir, s.size - 1)) {
             return;
         }
     }
 
-    if (s.dir === 0) {
-        for (let i = 1; i < s.size; i++) {
-            board[s.y][s.x + i] = 0;
-            board[s.y + i][s.x] = selected + 1;
-            boardNodes[s.y][s.x + i].classList.remove('ship');
-            boardNodes[s.y + i][s.x].classList.add('ship');
+    for (let i = 1; i < s.size; i++) {
+        if (s.dir === 0) {
+            board[s.z][s.y][s.x + i] = 0;
+            boardNodes[s.z][s.y][s.x + i].classList.remove('ship');
+        } else if (s.dir === 1) {
+            board[s.z][s.y + i][s.x] = 0;
+            boardNodes[s.z][s.y + i][s.x].classList.remove('ship');
+        } else if (s.dir === 2) {
+            board[s.z + i][s.y][s.x] = 0;
+            boardNodes[s.z + i][s.y][s.x].classList.remove('ship');
         }
-    } else {
-        for (let i = 1; i < s.size; i++) {
-            board[s.y + i][s.x] = 0;
-            board[s.y][s.x + i] = selected + 1;
-            boardNodes[s.y + i][s.x].classList.remove('ship');
-            boardNodes[s.y][s.x + i].classList.add('ship');
+        
+        if (nextDir === 0) {
+            board[s.z][s.y][s.x + i] = selected + 1;
+            boardNodes[s.z][s.y][s.x + i].classList.add('ship');
+        } else if (nextDir === 1) {
+            board[s.z][s.y + i][s.x] = selected + 1;
+            boardNodes[s.z][s.y + i][s.x].classList.add('ship');
+        } else if (nextDir === 2) {
+            board[s.z + i][s.y][s.x] = selected + 1;
+            boardNodes[s.z + i][s.y][s.x].classList.add('ship');
         }
     }
 
-    ships[selected].dir = s.dir === 0 ? 1 : 0;
-    selectShip(s.x, s.y);
+    ships[selected].dir = nextDir;
+    selectShip(s.x, s.y, s.z);
 }
 
 function unselectShip() {
@@ -254,7 +273,11 @@ function handleClick(t) {
 
     if (board[z][y][x] !== 0) {
         if (board[z][y][x] === selected + 1) {
-            rotateShip();
+            if (t.which === 1) {
+                rotateShip(-1);
+            } else if (t.which === 3) {
+                rotateShip(1);
+            }
         } else {
             unselectShip();
             selectShip(x, y, z);
@@ -270,7 +293,7 @@ function ready() {
     unselectShip();
     const tiles = document.querySelectorAll('.tile');
     tiles.forEach(t => {
-        t.removeEventListener('click', handleClick);
+        t.removeEventListener('click', handleClick, false);
         t.classList.remove('pointer');
     });
     socket.emit('ready', ships);
@@ -278,7 +301,14 @@ function ready() {
 
 function addEventListeners() {
     const tiles = document.querySelectorAll('.tile');
-    tiles.forEach(t => t.addEventListener('click', handleClick));
+    tiles.forEach(t => {
+        t.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            return false;
+        }, false);
+    });
+    
+    tiles.forEach(t => t.addEventListener('mouseup', handleClick));
 
     const startButton = document.querySelector('#start');
     startButton.addEventListener('click', () => {
