@@ -328,25 +328,35 @@ function displayPrevSlice() {
 }
 
 function displayExplodedView() {
+    const sliceViewButton = document.querySelector('#slice-view');
+    const explodedViewButton = document.querySelector('#exploded-view');
+    const nextSliceButton = document.querySelector('#next-slice');
+    const prevSliceButton = document.querySelector('#prev-slice');
+    
     for (let n of boardContainerNodes) {
         n.classList.remove('hidden');
     }
-    const sliceViewButton = document.querySelector('#slice-view');
     sliceViewButton.classList.remove('hidden');
-    const explodedViewButton = document.querySelector('#exploded-view');
     explodedViewButton.classList.add('hidden');
+    nextSliceButton.classList.add('hidden');
+    prevSliceButton.classList.add('hidden');
 }
 
 function displaySliceView() {
+    const explodedViewButton = document.querySelector('#exploded-view');
+    const sliceViewButton = document.querySelector('#slice-view');
+    const nextSliceButton = document.querySelector('#next-slice');
+    const prevSliceButton = document.querySelector('#prev-slice');
+    
     for (let i = 0; i < boardContainerNodes.length; i++) {
         if (i !== slice) {
             boardContainerNodes[i].classList.add('hidden');
         }
     }
-    const explodedViewButton = document.querySelector('#exploded-view');
     explodedViewButton.classList.remove('hidden');
-    const sliceViewButton = document.querySelector('#slice-view');
     sliceViewButton.classList.add('hidden');
+    nextSliceButton.classList.remove('hidden')
+    prevSliceButton.classList.remove('hidden')
 }
 
 function addEventListeners() {
