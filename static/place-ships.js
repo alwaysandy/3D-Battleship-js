@@ -3,7 +3,6 @@ function createBoardDiv() {
     for (let z = 0; z < BOARD_SIZE; z++) {
         const boardNode = document.createElement('div');
         boardNode.classList.add('board-container');
-
         if (z !== 0) {
             boardNode.classList.add('hidden');
         }
@@ -41,6 +40,13 @@ function createBoardDiv() {
         zP.classList.add('zInfo');
         zP.textContent = "z: " + z;
         boardNode.appendChild(zP);
+
+        if (z === 0) {
+            const shipSize = document.createElement('p');
+            shipSize.classList.add('ship-size');
+            shipSize.textContent = "ship size: n/a";
+            boardNode.appendChild(shipSize);
+        }
     }
 }
 
@@ -127,12 +133,15 @@ function placeShip(size, shipNum) {
     for (let i = 0; i < size; i++) {
         if (loc.dir === 0) {
             boardNodes[loc.z][loc.y][loc.x + i].classList.add('ship', 'pointer');
+            //boardNodes[loc.z][loc.y][loc.x + i].textContent = size;
             board[loc.z][loc.y][loc.x + i] = shipNum;
         } else if (loc.dir === 1){
             boardNodes[loc.z][loc.y + i][loc.x].classList.add('ship', 'pointer');
+            //boardNodes[loc.z][loc.y + i][loc.x].textContent = size;
             board[loc.z][loc.y + i][loc.x] = shipNum;
         } else if (loc.dir === 2) {
             boardNodes[loc.z + i][loc.y][loc.x].classList.add('ship', 'pointer');
+            //boardNodes[loc.z + i][loc.y][loc.x].textContent = size;
             board[loc.z + i][loc.y][loc.x] = shipNum;
         } 
     }
@@ -255,6 +264,7 @@ function unselectShip() {
     }
 
     selected = -1;
+    shipSizeText.textContent = "ship size: n/a";
 }
 
 function selectShip(x, y, z) {
@@ -273,6 +283,7 @@ function selectShip(x, y, z) {
         }
     }
     selected = board[z][y][x] - 1;
+    shipSizeText.textContent = "ship size: " + ship.size;
 }
 
 function handleClick(t) {
@@ -316,6 +327,7 @@ function displayNextSlice() {
     boardContainerNodes[slice].classList.add('hidden');
     slice++;
     boardContainerNodes[slice].classList.remove('hidden');
+    boardContainerNodes[slice].appendChild(shipSizeText);
 }
 
 function displayPrevSlice() {
@@ -325,6 +337,7 @@ function displayPrevSlice() {
     boardContainerNodes[slice].classList.add('hidden');
     slice--;
     boardContainerNodes[slice].classList.remove('hidden');
+    boardContainerNodes[slice].appendChild(shipSizeText);
 }
 
 function displayExplodedView() {
@@ -402,6 +415,8 @@ createBoardDiv();
 createBoardDataArray();
 placeRandomShips();
 addEventListeners();
+
+const shipSizeText = document.querySelector('.ship-size');
 
 socket.on('redirectToGame', (id) => {
     id = JSON.parse(id);
