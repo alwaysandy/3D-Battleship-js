@@ -22,13 +22,18 @@ button {
 
 .flex-container {
     display: flex;
-    gap: 50px;
+    flex-direction: column;
 }
 
 .board-container {
     display: flex;
     flex-direction: column;
     padding: 5px;
+}
+
+.board-row {
+    display: flex;
+    gap: 50px;
 }
 
 .line {
