@@ -52,6 +52,13 @@ function createBoardDivs() {
                 }
                 boardNode.appendChild(line);
             }
+            const zP = document.createElement('p');
+            zP.classList.add('zInfo');
+            zP.textContent = "z: " + z;
+            boardNode.appendChild(zP);
+            if (i === 1) {
+                zP.classList.add('opZInfo');
+            }
             boardRows[z].appendChild(boardNode);
         }
     }
