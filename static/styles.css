@@ -20,6 +20,11 @@ button {
     font-size: 20px;
 }
 
+.flex-container {
+    display: flex;
+    gap: 50px;
+}
+
 .board-container {
     display: flex;
     flex-direction: column;
@@ -34,7 +39,10 @@ button {
     width: 20px;
     height: 20px;
     border: 1px solid black;
-    color: white;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .tile.left-edge {
@@ -61,13 +69,31 @@ button {
     background-color: orange;
 }
 
-.pointer {
+
+.op-tile {
     cursor: pointer;
 }
 
-.hidden {
-    display: none;
+.op-tile:hover {
+    background-color: lightblue;
 }
+
+.op-tile:active {
+    background-color: #86c5da;
+}
+
+.hit {
+    color: red;
+}
+
+.missed {
+    background-color: #76bbff;
+}
+
+div.tile.sunk {
+    background-color: red;
+}
+
 
 .zInfo {
     font-size: 20px;
@@ -81,4 +107,12 @@ button {
 
 .invisible {
     visibility: hidden;visible/hidden/collapse;
+}
+
+.hidden {
+    display: none;
+}
+
+.pointer {
+    cursor: pointer;
 }
