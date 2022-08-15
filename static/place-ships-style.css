@@ -13,12 +13,13 @@ p {
 
 button {
     margin-top: 15px;
-    font-size: 40px;
+    font-size: 20px;
 }
 
 .board-container {
     display: flex;
     flex-direction: column;
+    padding: 10px;
 }
 
 .line {
@@ -26,8 +27,8 @@ button {
 }
 
 .tile {
-    width: 40px;
-    height: 40px;
+    width: 20px;
+    height: 20px;
     border: 1px solid black;
 }
 
@@ -61,4 +62,9 @@ button {
 
 .hidden {
     display: none;
+}
+
+.zInfo {
+    font-size: 20px;
+    margin: 0;
 }

@@ -1,7 +1,14 @@
 function createBoardDiv() {
-    const boardNode = document.querySelector('.board-container');
-    const boardNodes = [];
+    const gameNode = document.querySelector('.game-container');
     for (let z = 0; z < BOARD_SIZE; z++) {
+        const boardNode = document.createElement('div');
+        boardNode.classList.add('board-container');
+
+        if (z !== 0) {
+            boardNode.classList.add('hidden');
+        }
+        gameNode.appendChild(boardNode);
+        boardContainerNodes.push(boardNode);
         boardNodes.push([]);
         for (let y = 0; y < BOARD_SIZE; y++) {
             const line = document.createElement('div');
@@ -30,8 +37,11 @@ function createBoardDiv() {
             }
             boardNode.appendChild(line);
         }
+        const zP = document.createElement('p');
+        zP.classList.add('zInfo');
+        zP.textContent = "z: " + z;
+        boardNode.appendChild(zP);
     }
-    return boardNodes;
 }
 
 function createBoardDataArray() {
@@ -174,8 +184,7 @@ function moveShip(x, y, z) {
 
 function rotateShip(next) {
     let s = ships[selected];
-    let nextDir = s.dir;
-    nextDir += next;
+    let nextDir = s.dir + next;
     if (nextDir === -1) {
         nextDir = 2; 
     } else if (nextDir === 3) {
@@ -194,6 +203,7 @@ function rotateShip(next) {
         }
     } else if (nextDir === 2) {
         if (checkCollision(s.x, s.y, s.z + 1, nextDir, s.size - 1)) {
+            console.log("can't rotate");
             return;
         }
     }
@@ -248,7 +258,6 @@ function unselectShip() {
 }
 
 function selectShip(x, y, z) {
-    console.log(board[z][y][x]);
     let ship = ships[(board[z][y][x]) - 1];
     if (ship.dir === 0) {
         for (let i = 0; i < ship.size; i++) {
@@ -299,6 +308,47 @@ function ready() {
     socket.emit('ready', ships);
 }
 
+function displayNextSlice() {
+    if (slice === 4) {
+        return;
+    }
+
+    boardContainerNodes[slice].classList.add('hidden');
+    slice++;
+    boardContainerNodes[slice].classList.remove('hidden');
+}
+
+function displayPrevSlice() {
+    if (slice === 0) {
+        return;
+    }
+    boardContainerNodes[slice].classList.add('hidden');
+    slice--;
+    boardContainerNodes[slice].classList.remove('hidden');
+}
+
+function displayExplodedView() {
+    for (let n of boardContainerNodes) {
+        n.classList.remove('hidden');
+    }
+    const sliceViewButton = document.querySelector('#slice-view');
+    sliceViewButton.classList.remove('hidden');
+    const explodedViewButton = document.querySelector('#exploded-view');
+    explodedViewButton.classList.add('hidden');
+}
+
+function displaySliceView() {
+    for (let i = 0; i < boardContainerNodes.length; i++) {
+        if (i !== slice) {
+            boardContainerNodes[i].classList.add('hidden');
+        }
+    }
+    const explodedViewButton = document.querySelector('#exploded-view');
+    explodedViewButton.classList.remove('hidden');
+    const sliceViewButton = document.querySelector('#slice-view');
+    sliceViewButton.classList.add('hidden');
+}
+
 function addEventListeners() {
     const tiles = document.querySelectorAll('.tile');
     tiles.forEach(t => {
@@ -310,6 +360,18 @@ function addEventListeners() {
     
     tiles.forEach(t => t.addEventListener('mouseup', handleClick));
 
+    const nextSlice = document.querySelector('#next-slice');
+    nextSlice.addEventListener('click', displayNextSlice);
+
+    const prevSlice = document.querySelector('#prev-slice');
+    prevSlice.addEventListener('click', displayPrevSlice);
+
+    const explodedViewButton = document.querySelector('#exploded-view');
+    explodedViewButton.addEventListener('click', displayExplodedView);
+
+    const sliceViewButton = document.querySelector('#slice-view');
+    sliceViewButton.addEventListener('click', displaySliceView);
+
     const startButton = document.querySelector('#start');
     startButton.addEventListener('click', () => {
         startButton.classList.add('hidden');
@@ -320,10 +382,13 @@ function addEventListeners() {
 const BOARD_SIZE = 5;
 const board = [];
 const ships = [];
+const boardNodes = [];
+const boardContainerNodes = [];
 let selected = -1;
+let slice = 0;
 let socket = io();
 
-const boardNodes = createBoardDiv();
+createBoardDiv();
 createBoardDataArray();
 placeRandomShips();
 addEventListeners();
