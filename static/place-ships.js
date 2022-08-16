@@ -313,7 +313,7 @@ function ready() {
     unselectShip();
     const tiles = document.querySelectorAll('.tile');
     tiles.forEach(t => {
-        t.removeEventListener('click', handleClick, false);
+        t.removeEventListener('mouseup', handleClick, false);
         t.classList.remove('pointer');
     });
     socket.emit('ready', ships);
