@@ -166,22 +166,22 @@ function moveShip(x, y, z) {
         for (let i = 0; i < s.size; i++) {
             board[s.z][s.y][s.x + i] = 0;
             board[z][y][x + i] = selected + 1;
-            boardNodes[s.z][s.y][s.x + i].classList.remove('ship');
-            boardNodes[z][y][x + i].classList.add('ship');
+            boardNodes[s.z][s.y][s.x + i].classList.remove('ship', 'pointer');
+            boardNodes[z][y][x + i].classList.add('ship', 'pointer');
         }
     } else if (s.dir === 1){
         for (let i = 0; i < s.size; i++) {
             board[s.z][s.y + i][s.x] = 0;
             board[z][y + i][x] = selected + 1;
-            boardNodes[s.z][s.y + i][s.x].classList.remove('ship');
-            boardNodes[z][y + i][x].classList.add('ship');
+            boardNodes[s.z][s.y + i][s.x].classList.remove('ship', 'pointer');
+            boardNodes[z][y + i][x].classList.add('ship', 'pointer');
         }
     } else if (s.dir === 2) {
         for (let i = 0; i < s.size; i++) {
             board[s.z + i][s.y][s.x] = 0;
             board[z + i][y][x] = selected + 1;
-            boardNodes[s.z + i][s.y][s.x].classList.remove('ship');
-            boardNodes[z + i][y][x].classList.add('ship');
+            boardNodes[s.z + i][s.y][s.x].classList.remove('ship', 'pointer');
+            boardNodes[z + i][y][x].classList.add('ship', 'pointer');
         }
     }
 
@@ -220,24 +220,24 @@ function rotateShip(next) {
     for (let i = 1; i < s.size; i++) {
         if (s.dir === 0) {
             board[s.z][s.y][s.x + i] = 0;
-            boardNodes[s.z][s.y][s.x + i].classList.remove('ship');
+            boardNodes[s.z][s.y][s.x + i].classList.remove('ship', 'pointer');
         } else if (s.dir === 1) {
             board[s.z][s.y + i][s.x] = 0;
-            boardNodes[s.z][s.y + i][s.x].classList.remove('ship');
+            boardNodes[s.z][s.y + i][s.x].classList.remove('ship', 'pointer');
         } else if (s.dir === 2) {
             board[s.z + i][s.y][s.x] = 0;
-            boardNodes[s.z + i][s.y][s.x].classList.remove('ship');
+            boardNodes[s.z + i][s.y][s.x].classList.remove('ship', 'pointer');
         }
         
         if (nextDir === 0) {
             board[s.z][s.y][s.x + i] = selected + 1;
-            boardNodes[s.z][s.y][s.x + i].classList.add('ship');
+            boardNodes[s.z][s.y][s.x + i].classList.add('ship', 'pointer');
         } else if (nextDir === 1) {
             board[s.z][s.y + i][s.x] = selected + 1;
-            boardNodes[s.z][s.y + i][s.x].classList.add('ship');
+            boardNodes[s.z][s.y + i][s.x].classList.add('ship', 'pointer');
         } else if (nextDir === 2) {
             board[s.z + i][s.y][s.x] = selected + 1;
-            boardNodes[s.z + i][s.y][s.x].classList.add('ship');
+            boardNodes[s.z + i][s.y][s.x].classList.add('ship', 'pointer');
         }
     }
 
