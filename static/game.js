@@ -1,3 +1,5 @@
+//TODO change colour of hit square on playerBoard
+
 function createBoardDivs() {
     const container = document.querySelector('.flex-container');
     let boardRow, boardNode;
@@ -235,6 +237,7 @@ const shots = createShotsDataArray();
 let ships = [];
 let turn;
 let slice = 0;
+let lastShot = [-1, -1, -1];
 const messageNode = document.querySelector('.message');
 
 let socket = io();
@@ -258,7 +261,14 @@ socket.on('receiveShot', (c) => {
     response.x = c.x;
     response.y = c.y;
     response.z = c.z;
+    if (lastShot[0] !== -1) {
+        playerBoardNodes[lastShot[0]][lastShot[1]][lastShot[2]].classList.remove('last-shot');
+    }
+    lastShot[0] = c.z;
+    lastShot[1] = c.y;
+    lastShot[2] = c.x;
     playerBoardNodes[c.z][c.y][c.x].textContent = "X";
+    playerBoardNodes[c.z][c.y][c.x].classList.add('last-shot');
     for (let i = 0; i < ships.length; i++) {
         let s = ships[i];
         if (s.coords.length > 0) {

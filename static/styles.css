@@ -95,6 +95,10 @@ button {
     background-color: #76bbff;
 }
 
+.last-shot {
+    background-color: pink;
+}
+
 div.tile.sunk {
     background-color: red;
 }
