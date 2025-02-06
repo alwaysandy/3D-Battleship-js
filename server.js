@@ -21,7 +21,7 @@ app.get("/game/create_room", (req, res) => {
     res.send(roomCode);
 });
 
-app.get("/room/:roomId", (req, res) => {
+app.get("/game/room/:roomId", (req, res) => {
    const room = req.params.roomId;
    console.log(room);
    res.send(`Entered room ${room}`);
