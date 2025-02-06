@@ -9,6 +9,11 @@ app.use(express.static('public'));
 
 io.on('connection', (socket) => {
     console.log("Testing");
+
+    socket.on('createRoom', async (callback) => {
+       console.log("Creating new room for " + socket.id);
+       if (callback) callback({success: true});
+    });
 })
 
 app.get("/", (req, res) => {
