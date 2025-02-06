@@ -19,9 +19,21 @@
 
     <script>
         const socket = io();
-        function createRoom() {
-            socket.emit('createRoom', (response) => {
-                console.log(response);
+        async function createRoom() {
+            if (localStorage.getItem('userId') === null) {
+                localStorage.setItem('userId', crypto.randomUUID());
+            }
+
+            const userId = localStorage.getItem('userId');
+            await socket.emit('createRoom', userId, (response) => {
+                alert(`Room is ${response.room}`);
+                if (response.success) {
+                    localStore.setItem('roomId', response.room);
+                    // TODO show a modal telling user they're waiting for someone to join
+                } else {
+                    // TODO fancier bootstrap stuff
+                    alert("Room could not be created.");
+                }
             });
         }
     </script>

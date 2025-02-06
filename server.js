@@ -8,16 +8,14 @@ const utils = require('./utils');
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
-    console.log("Testing");
-
-    socket.on('createRoom', async (callback) => {
-       console.log("Creating new room for " + socket.id);
-       if (callback) callback({success: true});
+    socket.on('createRoom', async (userId, callback) => {
+       await socket.join("abcd");
+       if (callback) callback({success: true, room: "abcd"});
     });
 })
 
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'place_ships.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get("/game/create_room", (req, res) => {
