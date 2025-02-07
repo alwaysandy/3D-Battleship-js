@@ -7,7 +7,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http)
 const path = require('path', {
     cors: {
-        origin: "https://threed-battleship.onrender.com",
+        origin: "*",
         methods: ["GET", "POST"],
         credentials: true
     }
