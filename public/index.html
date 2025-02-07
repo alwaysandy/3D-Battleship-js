@@ -26,9 +26,9 @@
 
             const userId = localStorage.getItem('userId');
             await socket.emit('createRoom', userId, (response) => {
-                // alert(`Room is ${response.room}`);
                 if (response.success) {
                     localStorage.setItem('roomId', response.room);
+                    document.getElementById('createdRoomId').textContent = response.room;
                     // TODO show a modal telling user they're waiting for someone to join
                 } else {
                     // TODO fancier bootstrap stuff
@@ -38,16 +38,18 @@
         }
 
         function cancelRoom() {
-            alert("This is being run");
             const roomId = localStorage.getItem('roomId');
             if (!roomId) {
-                alert("No room id provided");
                 return;
             }
 
             socket.emit('cancelRoom', (roomId));
             localStorage.removeItem('roomId');
         }
+
+        socket.on('startPlacing', () => {
+            window.location.replace('/place_ships');
+        });
     </script>
 </head>
 
@@ -62,10 +64,11 @@
       <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
               <div class="modal-header">
-                  <h5 class="modal-title">Enter room code</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 class="modal-title">Room created!</h5>
               </div>
               <div class="modal-body">
+                  <p class="modal-content" id="createdRoomId">Your room code is: </p>
+                  <p>Waiting for other user to join..</p>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelRoom()">Cancel</button>
               </div>
           </div>

@@ -1,7 +1,16 @@
+const {constructor} = require("bun");
+
 class Room {
     constructor() {
-        this.players = [];
+        this.players = new Set();
         this.gameStatus = "waiting";
+    }
+}
+
+class User {
+    constructor(userId, roomId) {
+        this.userId = userId;
+        this.roomId = roomId;
     }
 }
 
@@ -16,6 +25,7 @@ function createRoomId() {
 }
 
 module.exports = {
+    User,
     Room,
     createRoomId,
 }
