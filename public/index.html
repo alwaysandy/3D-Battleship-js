@@ -17,6 +17,7 @@
         function createRoom() {
             const userId = localStorage.getItem('userId');
             socket.emit('createRoom', userId, (response) => {
+                alert(response.room);
                 if (response.success) {
                     localStorage.setItem('roomId', response.room);
                     document.getElementById('createdRoomId').textContent = response.room;
