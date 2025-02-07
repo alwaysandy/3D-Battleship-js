@@ -6,7 +6,9 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "https://threed-battleship.onrender.com",
+        origin: "*",
+        methods: ['GET', 'POST'],
+        credentials: true
     }
 });
 const path = require('path');
@@ -207,34 +209,20 @@ io.on('connection', (socket) => {
         delete rooms[roomCode];
     });
 
-    // socket.on('disconnect', async () => {
-    //     const user = userIds[socket.id];
-    //     if (!user) {
-    //         return;
-    //     }
-    //
-    //     if (!rooms[user.roomId]) {
-    //         return;
-    //     }
-    //
-    //     rooms[user.roomId].players.delete(user.userId);
-    //     delete rooms[user.roomId].playerSockets[user.userId];
-    // });
+    socket.on('disconnect', async () => {
+        const user = userIds[socket.id];
+        if (!user) {
+            return;
+        }
 
-    socket.on("disconnect", (reason, details) => {
-        // the reason of the disconnection, for example "transport error"
-        console.log(reason);
+        if (!rooms[user.roomId]) {
+            return;
+        }
 
-        // the low-level reason of the disconnection, for example "xhr post error"
-        console.log(details.message);
-
-        // some additional description, for example the status code of the HTTP response
-        console.log(details.description);
-
-        // some additional context, for example the XMLHttpRequest object
-        console.log(details.context);
+        rooms[user.roomId].players.delete(user.userId);
+        delete rooms[user.roomId].playerSockets[user.userId];
     });
-})
+});
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));

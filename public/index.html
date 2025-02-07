@@ -8,26 +8,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
-        const socket = io("https://threed-battleship.onrender.com", {
+        const socket = io({
             path: '/socket.io/',
             transports: ['websocket', 'polling'],
             secure: true
-        });
-
-        socket.on('connect', () => {
-            alert('Connected');
-            console.log('Connected');
-        });
-
-        socket.on("connect_error", (err) => {
-            // the reason of the error, for example "xhr poll error"
-            console.log(err.message);
-
-            // some additional description, for example the status code of the initial HTTP response
-            console.log(err.description);
-
-            // some additional context, for example the XMLHttpRequest object
-            console.log(err.context);
         });
 
         if (localStorage.getItem('userId') === null) {
