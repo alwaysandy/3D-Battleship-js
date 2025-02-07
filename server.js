@@ -30,6 +30,7 @@ async function handleRoomOperation(operation) {
 io.on('connection', (socket) => {
     console.log("Connection: " + socket.id);
     socket.on('createRoom', async (userId, callback) => {
+        console.log("Room being created.");
         let roomId = utils.createRoomId();
         const success = await handleRoomOperation(async () => {
             while (roomId in rooms) {
