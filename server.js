@@ -7,7 +7,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http)
 const path = require('path');
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 const userIds = {};
@@ -28,6 +28,7 @@ io.on('connection', (socket) => {
 
     socket.on('joinRoom', async (userId, roomId, callback) => {
         const room = rooms[roomId];
+        console.log(roomId);
         if (!room) throw new Error('Room not found');
         if (room.players.length >= 2) {
             throw new Error(`Room ${roomId} has too many players already.`);
@@ -44,30 +45,40 @@ io.on('connection', (socket) => {
         callback({success: true, room: roomId});
     });
 
-    socket.on('ready', async(userId, roomId, board, callback) => {
+    socket.on('ready', async(userId, roomId, ships, callback) => {
         if (!roomId || !userId) {
             callback({success: false});
+            console.error("No room id or user id");
             return;
         }
 
         if (!rooms[roomId]) {
             callback({success: false});
+            console.error("Room id not found");
             return;
         }
 
         if (!rooms[roomId].players.has(userId)) {
             callback({success: false});
+            console.error("Room does not have player");
             return;
         }
 
         if (rooms[roomId].readyPlayers.has(userId)) {
             callback({success: false});
+            console.log(userId);
+            console.log(rooms[roomId])
+            console.error("Room already has ready player");
             return;
         }
 
-        rooms[roomId].players.add(userId);
-        if (rooms[roomId].readyPlayers.length == 2) {
+        rooms[roomId].readyPlayers.add(userId);
+        rooms[roomId].ships[userId] = ships;
+        if (rooms[roomId].readyPlayers.size === 2) {
             // Emit Game start
+            console.log("Emitting");
+            callback({success: true});
+            io.to(roomId).emit('startGame');
         }
 
         callback({success: true});
@@ -98,6 +109,10 @@ app.get("/", (req, res) => {
 app.get("/game/placeships", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'placeships.html'));
 });
+
+app.get("/game/play", (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'game.html'));
+})
 
 const PORT = 8080;
 http.listen(PORT, () => console.log(`Server listening on ${PORT}..`));

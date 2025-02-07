@@ -55,8 +55,8 @@
             localStorage.removeItem('roomId');
         }
 
-        socket.on('startPlacing', (roomId) => {
-            localStorage.setItem('roomId', roomId);
+        socket.on('startPlacing', (response) => {
+            localStorage.setItem('roomId', response.roomId);
             window.location.replace('/game/placeships');
         });
     </script>

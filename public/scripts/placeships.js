@@ -316,7 +316,24 @@ function ready() {
         t.removeEventListener('mouseup', handleClick, false);
         t.classList.remove('pointer');
     });
-    socket.emit('ready', ships);
+
+    const roomId = localStorage.getItem('roomId');
+    if (roomId === null) {
+        alert("Error: No room ID set");
+        window.location.replace("/");
+    }
+
+    const userId = localStorage.getItem('userId');
+    if (userId === null) {
+        alert("Error: No user ID set");
+        window.location.replace("/");
+    }
+
+    socket.emit('ready', userId, roomId, ships, (response) => {
+        if (!response.success) {
+            alert("Error: Could not ready up! This should not happened");
+        }
+    });
 }
 
 function displayNextSlice() {
@@ -409,7 +426,26 @@ const boardNodes = [];
 const boardContainerNodes = [];
 let selected = -1;
 let slice = 0;
-let socket = io();
+const socket = io();
+const roomId = localStorage.getItem('roomId');
+if (roomId === null) {
+    alert("Error: No room ID set");
+    window.location.replace("/");
+}
+
+const userId = localStorage.getItem('userId');
+if (userId === null) {
+    alert("Error: No user ID set");
+    window.location.replace("/");
+}
+
+console.log(roomId);
+socket.emit('joinRoom', userId, roomId, (response) => {
+    if (!response.success) {
+        alert("Error: Could not join a room");
+        window.location.replace("/");
+    }
+});
 
 createBoardDiv();
 createBoardDataArray();
@@ -418,8 +454,6 @@ addEventListeners();
 
 const shipSizeText = document.querySelector('.ship-size');
 
-socket.on('redirectToGame', (id) => {
-    id = JSON.parse(id);
-    sessionStorage.setItem('id', id);
-    window.location.replace('/game');
+socket.on('startGame', () => {
+    window.location.replace('/game/play');
 });
