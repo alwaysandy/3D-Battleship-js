@@ -26,11 +26,30 @@ io.on('connection', (socket) => {
         if (callback) callback({success: true, room: roomId});
     });
 
-    socket.on('cancelRoom', (roomCode) => {
+    socket.on('joinRoom', async (userId, roomId, callback) => {
+        const room = rooms[roomId];
+        if (!room) throw new Error('Room not found');
+        if (room.players.length >= 2) {
+            throw new Error(`Room ${roomId} has too many players already.`);
+        }
+
+        room.players.add(userId);
+        userIds[socket.id] = userId;
+        await socket.join(roomId);
+        io.to(roomId).emit('startPlacing', {
+            success: true,
+            roomId,
+        });
+
+        console.log("Sending callback");
+        callback({success: true, room: roomId});
+    });
+
+    socket.on('cancelRoom', async (roomCode) => {
         delete rooms[roomCode];
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
         const user = userIds[socket.id];
         if (!user) {
             return;
@@ -48,10 +67,8 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get("/game/room/:roomId", (req, res) => {
-   const room = req.params.roomId;
-   console.log(room);
-   res.send(`Entered room ${room}`);
+app.get("/game/placeships", (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'placeships.html'));
 });
 
 const PORT = 8080;

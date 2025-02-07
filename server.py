@@ -18,7 +18,7 @@ playerTwo = {
 
 @app.route('/')
 def index():
-    return render_template('place_ships.html')
+    return render_template('placeships.html')
 
 @app.route('/game')
 def game():

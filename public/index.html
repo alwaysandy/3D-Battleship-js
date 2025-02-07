@@ -8,22 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
-        function enterRoom(event) {
-            event.preventDefault();
-            const room = document.getElementById('roomId').value;
-            if (room) {
-                window.location.href = '/game/room/' + room;
-            }
-        }
-    </script>
-
-    <script>
         const socket = io();
-        async function createRoom() {
-            if (localStorage.getItem('userId') === null) {
-                localStorage.setItem('userId', crypto.randomUUID());
-            }
+        if (localStorage.getItem('userId') === null) {
+            localStorage.setItem('userId', crypto.randomUUID());
+        }
 
+        async function createRoom() {
             const userId = localStorage.getItem('userId');
             await socket.emit('createRoom', userId, (response) => {
                 if (response.success) {
@@ -33,6 +23,24 @@
                 } else {
                     // TODO fancier bootstrap stuff
                     alert("Room could not be created.");
+                }
+            });
+        }
+
+        async function enterRoom(event) {
+            const userId = localStorage.getItem('userId');
+            event.preventDefault();
+            const roomId = document.getElementById('roomId').value;
+            if (!roomId) {
+                // Show some kind of error popup
+            }
+
+            await socket.emit('joinRoom', userId, roomId, (response) => {
+                if (response.success) {
+                    localStorage.setItem('roomId', response.room);
+                    window.location.replace('/game/placeships');
+                } else {
+                    // TODO, handle errors here
                 }
             });
         }
@@ -47,8 +55,9 @@
             localStorage.removeItem('roomId');
         }
 
-        socket.on('startPlacing', () => {
-            window.location.replace('/place_ships');
+        socket.on('startPlacing', (roomId) => {
+            localStorage.setItem('roomId', roomId);
+            window.location.replace('/game/placeships');
         });
     </script>
 </head>
