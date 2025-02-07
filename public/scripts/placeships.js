@@ -426,10 +426,10 @@ const boardNodes = [];
 const boardContainerNodes = [];
 let selected = -1;
 let slice = 0;
-const socket = io({
-    path: '/socket.io/',
+
+const socket = io('https://threed-battleship.onrender.com', {
     transports: ['websocket', 'polling'],
-    secure: true
+    secure: true,
 });
 const roomId = localStorage.getItem('roomId');
 if (roomId === null) {

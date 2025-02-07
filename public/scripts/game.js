@@ -240,11 +240,11 @@ let slice = 0;
 let lastShot = [-1, -1, -1];
 const messageNode = document.querySelector('.message');
 
-const socket = io({
-    path: '/socket.io/',
+const socket = io('https://threed-battleship.onrender.com', {
     transports: ['websocket', 'polling'],
-    secure: true
+    secure: true,
 });
+
 const userId = localStorage.getItem('userId');
 const roomId = localStorage.getItem('roomId');
 

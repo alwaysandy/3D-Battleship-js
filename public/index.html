@@ -11,14 +11,6 @@
         const socket = io('https://threed-battleship.onrender.com', {
             transports: ['websocket', 'polling'],
             secure: true,
-            autoConnect: false,
-        });
-
-        console.log('Attempting to connect to server...');
-        socket.connect();
-
-        socket.on('connect', () => {
-            alert("Connected!!");
         });
 
         if (localStorage.getItem('userId') === null) {
@@ -27,9 +19,7 @@
 
         function createRoom() {
             const userId = localStorage.getItem('userId');
-            console.log("Emitting");
             socket.emit('createRoom', userId, (response) => {
-                alert(response.room);
                 if (response.success) {
                     localStorage.setItem('roomId', response.room);
                     document.getElementById('createdRoomId').textContent = response.room;

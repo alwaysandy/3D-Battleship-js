@@ -10,6 +10,7 @@ const io = require('socket.io')(http, {
         methods: ['GET', 'POST'],
         credentials: true,
     },
+
     pingTimeout: 60000,
     pingInterval: 25000
 });
@@ -31,17 +32,8 @@ async function handleRoomOperation(operation) {
     return true;
 }
 
-io.engine.on("connection_error", (err) => {
-    console.log(err.req);      // the request object
-    console.log(err.code);     // the error code, for example 1
-    console.log(err.message);  // the error message, for example "Session ID unknown"
-    console.log(err.context);  // some additional error context
-});
-
 io.on('connection', (socket) => {
-    console.log("Connection: " + socket.id);
     socket.on('createRoom', async (userId, callback) => {
-        console.log("Room being created.");
         let roomId = utils.createRoomId();
         const success = await handleRoomOperation(async () => {
             while (roomId in rooms) {
