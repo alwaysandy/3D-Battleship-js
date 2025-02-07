@@ -9,13 +9,14 @@
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
         const socket = io();
+        console.log("Connected");
         if (localStorage.getItem('userId') === null) {
             localStorage.setItem('userId', crypto.randomUUID());
         }
 
-        async function createRoom() {
+        function createRoom() {
             const userId = localStorage.getItem('userId');
-            await socket.emit('createRoom', userId, (response) => {
+            socket.emit('createRoom', userId, (response) => {
                 if (response.success) {
                     localStorage.setItem('roomId', response.room);
                     document.getElementById('createdRoomId').textContent = response.room;
