@@ -13,12 +13,18 @@
             transports: ['websocket', 'polling'],
             secure: true
         });
+
+        socket.on('connect', () => {
+            alert('Connected');
+            console.log('Connected');
+        });
         if (localStorage.getItem('userId') === null) {
             localStorage.setItem('userId', crypto.randomUUID());
         }
 
         function createRoom() {
             const userId = localStorage.getItem('userId');
+            console.log("Emitting");
             socket.emit('createRoom', userId, (response) => {
                 alert(response.room);
                 if (response.success) {
