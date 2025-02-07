@@ -8,7 +8,8 @@ const io = require('socket.io')(http)
 const path = require('path', {
     cors: {
         origin: "https://threed-battleship.onrender.com",
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
