@@ -241,18 +241,37 @@ let lastShot = [-1, -1, -1];
 const messageNode = document.querySelector('.message');
 
 let socket = io();
+const userId = localStorage.getItem('userId');
+const roomId = localStorage.getItem('roomId');
 
-socket.emit('updateID', sessionStorage.getItem('id'));
-socket.on('start_game', (data) => {
-    data = JSON.parse(data);
-    if (data.turn === data.id) {
+if (userId === null) {
+    alert("User ID is missing!");
+    window.location.replace("/");
+}
+
+if (roomId === null) {
+    alert("Room ID is missing!");
+    window.location.replace("/");
+}
+
+socket.emit('joinRoom', userId, roomId, (response) => {
+    // TODO ADD ERRORS
+    if (!response.success) {
+       alert("Could not join room!");
+       window.location.replace("/");
+    }
+});
+
+socket.on('start_game', (gameState) => {
+    if (gameState.turn === userId) {
         turn = 0;
         messageNode.textContent = "Your shot";
     } else {
         turn = 1;
         messageNode.textContent = "Waiting for shot..";
     }
-    updateShips(data.ships);
+
+    updateShips(gameState.ships);
     addEventListeners();
 });
 

@@ -439,7 +439,6 @@ if (userId === null) {
     window.location.replace("/");
 }
 
-console.log(roomId);
 socket.emit('joinRoom', userId, roomId, (response) => {
     if (!response.success) {
         alert("Error: Could not join a room");

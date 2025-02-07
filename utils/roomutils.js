@@ -5,7 +5,15 @@ class Room {
         this.players = new Set();
         this.gameStatus = "waiting";
         this.readyPlayers = new Set();
+        this.playerSockets = {};
         this.ships = {};
+        this.turn = undefined;
+    }
+
+    chooseFirstTurn() {
+        const playerList = Array.from(this.players);
+        const firstPlayer = playerList[Math.floor(Math.random() * playerList.length)];
+        this.turn = firstPlayer;
     }
 }
 

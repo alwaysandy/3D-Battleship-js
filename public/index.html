@@ -38,7 +38,6 @@
             await socket.emit('joinRoom', userId, roomId, (response) => {
                 if (response.success) {
                     localStorage.setItem('roomId', response.room);
-                    window.location.replace('/game/placeships');
                 } else {
                     // TODO, handle errors here
                 }

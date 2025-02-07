@@ -21,6 +21,7 @@ io.on('connection', (socket) => {
 
         rooms[roomId] = new Room();
         rooms[roomId].players.add(userId);
+        rooms[roomId].playerSockets[userId] = socket.id;
         userIds[socket.id] = new User(userId, roomId);
         await socket.join(roomId);
         if (callback) callback({success: true, room: roomId});
@@ -35,14 +36,41 @@ io.on('connection', (socket) => {
         }
 
         room.players.add(userId);
+        room.playerSockets[userId] = socket.id;
         userIds[socket.id] = userId;
         await socket.join(roomId);
-        io.to(roomId).emit('startPlacing', {
-            success: true,
-            roomId,
-        });
 
-        callback({success: true, room: roomId});
+        if (room.players.length < 2) {
+            callback({success: true, room: roomId});
+            return;
+        }
+
+        if (rooms[roomId].gameStatus === "waiting") {
+            rooms[roomId].gameStatus = "placing";
+            callback({success: true, room: roomId});
+            io.to(roomId).emit('startPlacing', {
+                success: true,
+                roomId,
+            });
+            return;
+        }
+
+        if (rooms[roomId].gameStatus === "playing") {
+            rooms[roomId].chooseFirstTurn();
+
+            for (let player of rooms[roomId].players) {
+                io.to(rooms[roomId].playerSockets[player]).emit(
+                    "start_game",
+                    {
+                        ships: rooms[roomId].ships[player],
+                        turn: rooms[roomId].turn,
+                    }
+                );
+            }
+            callback({success: true});
+        }
+
+        callback({success: true});
     });
 
     socket.on('ready', async(userId, roomId, ships, callback) => {
@@ -75,8 +103,7 @@ io.on('connection', (socket) => {
         rooms[roomId].readyPlayers.add(userId);
         rooms[roomId].ships[userId] = ships;
         if (rooms[roomId].readyPlayers.size === 2) {
-            // Emit Game start
-            console.log("Emitting");
+            rooms[roomId].gameStatus = "playing";
             callback({success: true});
             io.to(roomId).emit('startGame');
         }
@@ -99,6 +126,7 @@ io.on('connection', (socket) => {
         }
 
         rooms[user.roomId].players.delete(user.userId);
+        delete rooms[user.roomId].playerSockets[user.userId];
     });
 })
 
