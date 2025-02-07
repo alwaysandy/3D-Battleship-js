@@ -6,9 +6,8 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "*",
+        origin: "https://threed-battleship.onrender.com",
         methods: ['GET', 'POST'],
-        credentials: true
     }
 });
 const path = require('path');
