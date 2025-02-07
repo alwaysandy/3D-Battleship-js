@@ -4,12 +4,12 @@ const utils = require('./utils');
 
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http)
-const path = require('path', {
+const io = require('socket.io')(http, {
     cors: {
         origin: "https://threed-battleship.onrender.com",
     }
 });
+const path = require('path');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
