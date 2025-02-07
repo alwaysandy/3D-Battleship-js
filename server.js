@@ -6,10 +6,14 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "*:*",
+        origin: "https://threed-battleship.onrender.com",
         methods: ['GET', 'POST'],
-    }
+        credentials: true,
+    },
+    pingTimeout: 60000,
+    pingInterval: 25000
 });
+
 const path = require('path');
 
 app.use(express.static(path.join(__dirname, 'public')));
