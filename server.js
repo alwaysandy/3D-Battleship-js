@@ -41,8 +41,36 @@ io.on('connection', (socket) => {
             roomId,
         });
 
-        console.log("Sending callback");
         callback({success: true, room: roomId});
+    });
+
+    socket.on('ready', async(userId, roomId, board, callback) => {
+        if (!roomId || !userId) {
+            callback({success: false});
+            return;
+        }
+
+        if (!rooms[roomId]) {
+            callback({success: false});
+            return;
+        }
+
+        if (!rooms[roomId].players.has(userId)) {
+            callback({success: false});
+            return;
+        }
+
+        if (rooms[roomId].readyPlayers.has(userId)) {
+            callback({success: false});
+            return;
+        }
+
+        rooms[roomId].players.add(userId);
+        if (rooms[roomId].readyPlayers.length == 2) {
+            // Emit Game start
+        }
+
+        callback({success: true});
     });
 
     socket.on('cancelRoom', async (roomCode) => {

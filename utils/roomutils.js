@@ -4,6 +4,8 @@ class Room {
     constructor() {
         this.players = new Set();
         this.gameStatus = "waiting";
+        this.readyPlayers = new Set();
+        this.boards = {};
     }
 }
 
