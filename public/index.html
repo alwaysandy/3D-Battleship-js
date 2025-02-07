@@ -27,7 +27,7 @@
             });
         }
 
-        async function enterRoom(event) {
+        function enterRoom(event) {
             const userId = localStorage.getItem('userId');
             event.preventDefault();
             const roomId = document.getElementById('roomId').value;
@@ -35,13 +35,7 @@
                 // Show some kind of error popup
             }
 
-            await socket.emit('joinRoom', userId, roomId, (response) => {
-                if (response.success) {
-                    localStorage.setItem('roomId', response.room);
-                } else {
-                    // TODO, handle errors here
-                }
-            });
+            socket.emit('joinRoom', userId, roomId, (response) => {});
         }
 
         function cancelRoom() {

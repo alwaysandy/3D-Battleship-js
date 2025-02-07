@@ -12,188 +12,182 @@ app.use(express.static(path.join(__dirname, 'public')));
 const rooms = {};
 const userIds = {};
 
+async function handleRoomOperation(operation) {
+    try {
+        await operation();
+    } catch (error) {
+        console.error('Room operation failed:', error);
+        return false;
+    }
+    return true;
+}
+
 io.on('connection', (socket) => {
     socket.on('createRoom', async (userId, callback) => {
         let roomId = utils.createRoomId();
-        while (roomId in rooms) {
-            roomId = utils.createRoomId();
-        }
+        const success = await handleRoomOperation(async () => {
+            while (roomId in rooms) {
+                roomId = utils.createRoomId();
+            }
 
-        rooms[roomId] = new Room();
-        rooms[roomId].players.add(userId);
-        rooms[roomId].playerSockets[userId] = socket.id;
-        userIds[socket.id] = new User(userId, roomId);
-        await socket.join(roomId);
-        if (callback) callback({success: true, room: roomId});
+            rooms[roomId] = new Room();
+            rooms[roomId].players.add(userId);
+            rooms[roomId].playerSockets[userId] = socket.id;
+            userIds[socket.id] = new User(userId, roomId);
+            await socket.join(roomId);
+        });
+
+        if (callback) callback({success, room: roomId});
     });
 
     socket.on('joinRoom', async (userId, roomId, callback) => {
-        const room = rooms[roomId];
-        console.log(roomId);
-        if (!room) throw new Error('Room not found');
-        if (room.players.length >= 2) {
-            throw new Error(`Room ${roomId} has too many players already.`);
-        }
-
-        room.players.add(userId);
-        room.playerSockets[userId] = socket.id;
-        userIds[socket.id] = userId;
-        await socket.join(roomId);
-
-        if (room.players.length < 2) {
-            callback({success: true, room: roomId});
-            return;
-        }
-
-        if (rooms[roomId].gameStatus === "waiting") {
-            rooms[roomId].gameStatus = "placing";
-            callback({success: true, room: roomId});
-            io.to(roomId).emit('startPlacing', {
-                success: true,
-                roomId,
-            });
-            return;
-        }
-
-        if (rooms[roomId].gameStatus === "playing") {
-            rooms[roomId].chooseFirstTurn();
-
-            for (let player of rooms[roomId].players) {
-                io.to(rooms[roomId].playerSockets[player]).emit(
-                    "start_game",
-                    {
-                        ships: rooms[roomId].ships[player],
-                        turn: rooms[roomId].turn,
-                    }
-                );
+        const success = await handleRoomOperation(async () => {
+            const room = rooms[roomId];
+            if (room == undefined) throw new Error('Room not found');
+            if (room.players.length >= 2) {
+                throw new Error(`Room ${roomId} has too many players already.`);
             }
-            callback({success: true});
-        }
 
-        callback({success: true});
+            room.players.add(userId);
+            room.playerSockets[userId] = socket.id;
+            userIds[socket.id] = userId;
+            await socket.join(roomId);
+
+            if (room.players.length < 2) {
+                return;
+            }
+
+            if (rooms[roomId].gameStatus === "waiting") {
+                rooms[roomId].gameStatus = "placing";
+                // TODO DOUBLE CHECK THIS
+                io.to(roomId).emit('startPlacing', {
+                    success: true,
+                    roomId,
+                });
+
+                return;
+            }
+
+            if (rooms[roomId].gameStatus === "playing") {
+                rooms[roomId].chooseFirstTurn();
+
+                for (let player of rooms[roomId].players) {
+                    io.to(rooms[roomId].playerSockets[player]).emit(
+                        "start_game",
+                        {
+                            ships: rooms[roomId].ships[player],
+                            turn: rooms[roomId].turn,
+                        }
+                    );
+                }
+            }
+        });
+
+        callback({success});
     });
 
     socket.on('ready', async(userId, roomId, ships, callback) => {
-        if (!roomId || !userId) {
-            callback({success: false});
-            console.error("No room id or user id");
-            return;
-        }
+        const success = await handleRoomOperation(async () => {
+            if (!roomId || !userId) {
+                throw new Error("No room id or user id");
+            }
 
-        if (!rooms[roomId]) {
-            callback({success: false});
-            console.error("Room id not found");
-            return;
-        }
+            if (!rooms[roomId]) {
+                throw new Error("Room id not found");
+            }
 
-        if (!rooms[roomId].players.has(userId)) {
-            callback({success: false});
-            console.error("Room does not have player");
-            return;
-        }
+            if (!rooms[roomId].players.has(userId)) {
+                throw new Error("Room does not have player");
+            }
 
-        if (rooms[roomId].readyPlayers.has(userId)) {
-            callback({success: false});
-            console.log(userId);
-            console.log(rooms[roomId])
-            console.error("Room already has ready player");
-            return;
-        }
+            if (rooms[roomId].readyPlayers.has(userId)) {
+                throw new Error("Room already has ready player");
+                return;
+            }
 
-        rooms[roomId].readyPlayers.add(userId);
-        rooms[roomId].ships[userId] = ships;
-        if (rooms[roomId].readyPlayers.size === 2) {
-            rooms[roomId].gameStatus = "playing";
-            callback({success: true});
-            io.to(roomId).emit('startGame');
-        }
+            rooms[roomId].readyPlayers.add(userId);
+            rooms[roomId].ships[userId] = ships;
+            if (rooms[roomId].readyPlayers.size === 2) {
+                rooms[roomId].gameStatus = "playing";
+                io.to(roomId).emit('startGame');
+            }
+        });
 
-        callback({success: true});
+        callback({success});
     });
 
     socket.on('sendShot', async (userId, roomId, coords, callback) => {
-        if (!rooms[roomId]) {
-            callback({success: false});
-            console.error("Could not send shot: Room not found");
-            return;
-        }
+        const success = await handleRoomOperation(async () => {
+            if (!rooms[roomId]) {
+                throw new Error("Could not send shot: Room not found");
+            }
 
-        if (!rooms[roomId].players.has(userId)) {
-            callback({success: false});
-            console.error("Could not send shot: Player not found in room");
-            return;
-        }
+            if (!rooms[roomId].players.has(userId)) {
+                throw new Error("Could not send shot: Player not found in room");
+            }
 
-        if (!rooms[roomId].turn == userId) {
-            callback({success: false});
-            console.error("Could not send shot: Not users turn");
-            return;
-        }
+            if (!rooms[roomId].turn === userId) {
+                throw new Error("Could not send shot: Not users turn");
+            }
 
-        const players = Array.from(rooms[roomId].players);
-        if (players[0] === userId) {
-            io.to(rooms[roomId].playerSockets[players[1]]).emit('receiveShot', coords);
-            rooms[roomId].turn = players[1];
-        } else {
-            io.to(rooms[roomId].playerSockets[players[0]]).emit('receiveShot', coords);
-            rooms[roomId].turn = players[0];
-        }
+            const players = Array.from(rooms[roomId].players);
+            if (players[0] === userId) {
+                io.to(rooms[roomId].playerSockets[players[1]]).emit('receiveShot', coords);
+                rooms[roomId].turn = players[1];
+            } else {
+                io.to(rooms[roomId].playerSockets[players[0]]).emit('receiveShot', coords);
+                rooms[roomId].turn = players[0];
+            }
+        })
 
-        callback({success: true});
+        callback({success});
     });
 
 
     socket.on('shotResponse', async (userId, roomId, response, callback) => {
-        if (!rooms[roomId]) {
-            callback({success: false});
-            console.error("Could not send shot: Room not found");
-            return;
-        }
+        const success = await handleRoomOperation(async () => {
+            if (!rooms[roomId]) {
+                throw new Error("Could not send shot: Room not found");
+            }
 
-        if (!rooms[roomId].players.has(userId)) {
-            callback({success: false});
-            console.error("Could not send shot: Player not found in room");
-            return;
-        }
+            if (!rooms[roomId].players.has(userId)) {
+                throw new Error("Could not send shot: Player not found in room");
+            }
 
-        const players = Array.from(rooms[roomId].players);
-        if (players[0] === userId) {
-            io.to(rooms[roomId].playerSockets[players[1]]).emit('shotResponse', response);
-        } else {
-            io.to(rooms[roomId].playerSockets[players[0]]).emit('shotResponse', response);
-        }
-
-        callback({success: true});
+            const players = Array.from(rooms[roomId].players);
+            if (players[0] === userId) {
+                io.to(rooms[roomId].playerSockets[players[1]]).emit('shotResponse', response);
+            } else {
+                io.to(rooms[roomId].playerSockets[players[0]]).emit('shotResponse', response);
+            }
+        });
+        callback({success});
     });
 
 
     socket.on('game_over', async (userId, roomId, callback) => {
-        if (!rooms[roomId]) {
-            callback({success: false});
-            console.error("Could not send shot: Room not found");
-            return;
-        }
+        const success = await handleRoomOperation(async () => {
+            if (!rooms[roomId]) {
+                throw new Error("Could not send shot: Room not found");
+            }
 
-        if (!rooms[roomId].players.has(userId)) {
-            callback({success: false});
-            console.error("Could not send shot: Player not found in room");
-            return;
-        }
+            if (!rooms[roomId].players.has(userId)) {
+                throw new Error("Could not send shot: Player not found in room");
+            }
 
-        if (!rooms[roomId].turn == userId) {
-            callback({success: false});
-            console.error("Could not send shot: Not users turn");
-            return;
-        }
+            if (!rooms[roomId].turn === userId) {
+                throw new Error("Could not send shot: Not users turn");
+            }
 
-        const players = Array.from(rooms[roomId].players);
-        if (players[0] === userId) {
-            io.to(rooms[roomId].playerSockets[players[1]]).emit('game_over');
-        } else {
-            io.to(rooms[roomId].playerSockets[players[0]]).emit('game_over');
-        }
+            const players = Array.from(rooms[roomId].players);
+            if (players[0] === userId) {
+                io.to(rooms[roomId].playerSockets[players[1]]).emit('game_over');
+            } else {
+                io.to(rooms[roomId].playerSockets[players[0]]).emit('game_over');
+            }
+        })
 
-        callback({success: true});
+        callback({success});
     });
 
     socket.on('cancelRoom', async (roomCode) => {
