@@ -240,7 +240,11 @@ let slice = 0;
 let lastShot = [-1, -1, -1];
 const messageNode = document.querySelector('.message');
 
-let socket = io();
+const socket = io({
+    path: '/socket.io/',
+    transports: ['websocket', 'polling'],
+    secure: true
+});
 const userId = localStorage.getItem('userId');
 const roomId = localStorage.getItem('roomId');
 

@@ -426,7 +426,11 @@ const boardNodes = [];
 const boardContainerNodes = [];
 let selected = -1;
 let slice = 0;
-const socket = io();
+const socket = io({
+    path: '/socket.io/',
+    transports: ['websocket', 'polling'],
+    secure: true
+});
 const roomId = localStorage.getItem('roomId');
 if (roomId === null) {
     alert("Error: No room ID set");

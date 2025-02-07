@@ -28,6 +28,7 @@ async function handleRoomOperation(operation) {
 }
 
 io.on('connection', (socket) => {
+    console.log("Connection: " + socket.id);
     socket.on('createRoom', async (userId, callback) => {
         let roomId = utils.createRoomId();
         const success = await handleRoomOperation(async () => {
