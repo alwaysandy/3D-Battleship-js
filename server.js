@@ -5,7 +5,12 @@ const utils = require('./utils');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http)
-const path = require('path');
+const path = require('path', {
+    cors: {
+        origin: "https://threed-battleship.onrender.com",
+        methods: ["GET", "POST"]
+    }
+);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
