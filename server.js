@@ -10,7 +10,7 @@ const path = require('path', {
         origin: "https://threed-battleship.onrender.com",
         methods: ["GET", "POST"]
     }
-);
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
