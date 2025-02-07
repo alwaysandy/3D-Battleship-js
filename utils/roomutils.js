@@ -1,3 +1,10 @@
+class Room {
+    constructor() {
+        this.players = [];
+        this.gameStatus = "waiting";
+    }
+}
+
 function createRoomId() {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789";
     let roomCode = ""
@@ -9,5 +16,6 @@ function createRoomId() {
 }
 
 module.exports = {
+    Room,
     createRoomId,
 }

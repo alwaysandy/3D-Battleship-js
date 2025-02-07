@@ -26,9 +26,9 @@
 
             const userId = localStorage.getItem('userId');
             await socket.emit('createRoom', userId, (response) => {
-                alert(`Room is ${response.room}`);
+                // alert(`Room is ${response.room}`);
                 if (response.success) {
-                    localStore.setItem('roomId', response.room);
+                    localStorage.setItem('roomId', response.room);
                     // TODO show a modal telling user they're waiting for someone to join
                 } else {
                     // TODO fancier bootstrap stuff
@@ -36,16 +36,44 @@
                 }
             });
         }
+
+        function cancelRoom() {
+            alert("This is being run");
+            const roomId = localStorage.getItem('roomId');
+            if (!roomId) {
+                alert("No room id provided");
+                return;
+            }
+
+            socket.emit('cancelRoom', (roomId));
+            localStorage.removeItem('roomId');
+        }
     </script>
 </head>
 
 <body>
-  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#roomModal">
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#joinModal">
      Join Room
   </button>
-  <button class="btn btn-secondary" href="/game/create_room" onclick="createRoom()">Create Room</button>
+  <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#createModal" onclick="createRoom()">Create Room</button>
 
-  <div class="modal fade" id="roomModal" tabindex="-1">
+  <!--  Create Room Modal-->
+  <div class="modal fade" id="createModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title">Enter room code</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelRoom()">Cancel</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Join Room Modal -->
+  <div class="modal fade" id="joinModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
               <div class="modal-header">

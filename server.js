@@ -1,27 +1,37 @@
 import express from "express";
+import {Room} from "./utils/roomutils.js";
+const utils = require('./utils');
+
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http)
 const path = require('path');
-const utils = require('./utils');
 
 app.use(express.static('public'));
 
+const rooms = {};
+
 io.on('connection', (socket) => {
     socket.on('createRoom', async (userId, callback) => {
-       await socket.join("abcd");
-       if (callback) callback({success: true, room: "abcd"});
+        let roomCode = utils.createRoomId();
+        while (roomCode in rooms) {
+            roomCode = utils.createRoomId();
+        }
+
+        console.log("Creating room: " + roomCode);
+        rooms[roomCode] = new Room();
+        await socket.join(roomCode);
+        if (callback) callback({success: true, room: roomCode});
     });
+
+    socket.on('cancelRoom', (roomCode) => {
+        delete rooms[roomCode];
+        console.log("Deleting room: " + roomCode);
+    })
 })
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get("/game/create_room", (req, res) => {
-    // Create random room code
-    const roomCode = utils.createRoomId();
-    res.send(roomCode);
 });
 
 app.get("/game/room/:roomId", (req, res) => {
