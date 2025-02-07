@@ -17,6 +17,10 @@
         console.log('Attempting to connect to server...');
         socket.connect();
 
+        socket.on('connect', () => {
+            alert("Connected!!");
+        });
+
         if (localStorage.getItem('userId') === null) {
             localStorage.setItem('userId', crypto.randomUUID());
         }
