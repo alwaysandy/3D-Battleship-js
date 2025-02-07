@@ -111,6 +111,91 @@ io.on('connection', (socket) => {
         callback({success: true});
     });
 
+    socket.on('sendShot', async (userId, roomId, coords, callback) => {
+        if (!rooms[roomId]) {
+            callback({success: false});
+            console.error("Could not send shot: Room not found");
+            return;
+        }
+
+        if (!rooms[roomId].players.has(userId)) {
+            callback({success: false});
+            console.error("Could not send shot: Player not found in room");
+            return;
+        }
+
+        if (!rooms[roomId].turn == userId) {
+            callback({success: false});
+            console.error("Could not send shot: Not users turn");
+            return;
+        }
+
+        const players = Array.from(rooms[roomId].players);
+        if (players[0] === userId) {
+            io.to(rooms[roomId].playerSockets[players[1]]).emit('receiveShot', coords);
+            rooms[roomId].turn = players[1];
+        } else {
+            io.to(rooms[roomId].playerSockets[players[0]]).emit('receiveShot', coords);
+            rooms[roomId].turn = players[0];
+        }
+
+        callback({success: true});
+    });
+
+
+    socket.on('shotResponse', async (userId, roomId, response, callback) => {
+        if (!rooms[roomId]) {
+            callback({success: false});
+            console.error("Could not send shot: Room not found");
+            return;
+        }
+
+        if (!rooms[roomId].players.has(userId)) {
+            callback({success: false});
+            console.error("Could not send shot: Player not found in room");
+            return;
+        }
+
+        const players = Array.from(rooms[roomId].players);
+        if (players[0] === userId) {
+            io.to(rooms[roomId].playerSockets[players[1]]).emit('shotResponse', response);
+        } else {
+            io.to(rooms[roomId].playerSockets[players[0]]).emit('shotResponse', response);
+        }
+
+        callback({success: true});
+    });
+
+
+    socket.on('game_over', async (userId, roomId, callback) => {
+        if (!rooms[roomId]) {
+            callback({success: false});
+            console.error("Could not send shot: Room not found");
+            return;
+        }
+
+        if (!rooms[roomId].players.has(userId)) {
+            callback({success: false});
+            console.error("Could not send shot: Player not found in room");
+            return;
+        }
+
+        if (!rooms[roomId].turn == userId) {
+            callback({success: false});
+            console.error("Could not send shot: Not users turn");
+            return;
+        }
+
+        const players = Array.from(rooms[roomId].players);
+        if (players[0] === userId) {
+            io.to(rooms[roomId].playerSockets[players[1]]).emit('game_over');
+        } else {
+            io.to(rooms[roomId].playerSockets[players[0]]).emit('game_over');
+        }
+
+        callback({success: true});
+    });
+
     socket.on('cancelRoom', async (roomCode) => {
         delete rooms[roomCode];
     });

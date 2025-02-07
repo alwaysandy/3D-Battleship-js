@@ -145,7 +145,7 @@ function handleClick(t) {
         let z = parseInt(t.target.dataset.z);
 
         if (!shots[z][y][x]) {
-            socket.emit('sendShot', {'x': x, 'y': y, 'z': z});
+            socket.emit('sendShot', userId, roomId, {'x': x, 'y': y, 'z': z}, (response) => {});
         }
     }
 }
@@ -305,9 +305,9 @@ socket.on('receiveShot', (c) => {
                         ships[i].coords.splice(j, 1);
                     }
                     response.hit = 1;
-                    socket.emit('shotResponse', response);
+                    socket.emit('shotResponse', userId, roomId, response, (r) => {});
                     if (ships.length == 0) {
-                        socket.emit("game_over");
+                        socket.emit("game_over", userId, roomId, (response) => {});
                         clearEventListeners();
                         messageNode.textContent = "You lose!";
                     }
@@ -320,7 +320,7 @@ socket.on('receiveShot', (c) => {
     turn = 0;
     messageNode.textContent = "Your shot";
     response.hit = 0;
-    socket.emit('shotResponse', response);
+    socket.emit('shotResponse', userId, roomId, response, (response) => {});
 });
 
 socket.on('shotResponse', (r) => {
