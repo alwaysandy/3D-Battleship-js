@@ -221,5 +221,5 @@ app.get("/game/play", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'game.html'));
 })
 
-const PORT = 8080;
+const PORT = process.env.PORT || 4000;
 http.listen(PORT, () => console.log(`Server listening on ${PORT}..`));
