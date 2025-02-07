@@ -9,7 +9,6 @@ const path = require('path', {
     cors: {
         origin: "*",
         methods: ["GET", "POST"],
-        credentials: true
     }
 });
 
