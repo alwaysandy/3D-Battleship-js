@@ -40,7 +40,6 @@ io.engine.on("connection_error", (err) => {
 
 io.on('connection', (socket) => {
     console.log("Connection: " + socket.id);
-    io.to(socket.id).emit('connect');
     socket.on('createRoom', async (userId, callback) => {
         console.log("Room being created.");
         let roomId = utils.createRoomId();
